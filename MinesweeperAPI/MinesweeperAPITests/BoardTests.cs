@@ -192,5 +192,42 @@ namespace MinesweeperAPITests
             var board = new Board(3, 3);
             Assert.Throws<Exception>(() => board.UnFlagCell(new BoardCellCoordinate(0, 0)));
         }
+
+        [Fact]
+        public void RandomBoardBuilderBuildsAValidBoard()
+        {
+            var width = 10;
+            var height = 12;
+            
+            var builder = new RandomBoardBuilder(40);
+            var board = builder.Build(width, height);
+
+            var minesCount = 0;
+            
+            for (var i = 0; i < width; i++) 
+            {
+                for (var j = 0; j < height; j++)
+                {
+                    if (board.HasMineOnCell(new BoardCellCoordinate(i, j)))
+                    {
+                        minesCount++;
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void DoesNotHaveUncoveredCellsWithoutMinesAfterUncoverACell()
+        {
+            var board = new Board(2, 2);
+
+            board.TrySetMineOnCell(new BoardCellCoordinate(0, 0));
+            Assert.True(board.HasCoveredCellsWithoutMines());
+
+            board.UncoverCell(new BoardCellCoordinate(0, 1));
+            board.UncoverCell(new BoardCellCoordinate(1, 0));
+            board.UncoverCell(new BoardCellCoordinate(1, 1));
+            Assert.False(board.HasCoveredCellsWithoutMines());
+        }
     }
 }

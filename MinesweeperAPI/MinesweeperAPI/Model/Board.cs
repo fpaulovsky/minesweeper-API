@@ -145,5 +145,21 @@ namespace MinesweeperAPI.Model
             }
             return boardPlayerView;
         }
+
+        public bool HasCoveredCellsWithoutMines()
+        {
+            for (var i = 0; i < Width; i++)
+            {
+                for (var j = 0; j < Height; j++)
+                {
+                    var currentCell = GetCell(i, j);
+                    if (!currentCell.HasMine && currentCell.State == BoardCellState.Covered)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }
