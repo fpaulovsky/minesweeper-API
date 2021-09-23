@@ -2,11 +2,13 @@
 
 namespace MinesweeperAPI.Model
 {
+    [Serializable]
     public class BoardCell
     {
         public BoardCell()
         {
             State = BoardCellState.Covered;
+            AdjacentMinesCount = 0;
         }
 
         public bool HasMine { get; set; }
@@ -15,14 +17,11 @@ namespace MinesweeperAPI.Model
 
         public BoardCellState State { get; private set; }
 
-        public void Uncover()
+        public bool Uncover()
         {
-            if (State == BoardCellState.Uncovered)
-            {
-                throw new Exception("Cannot uncover an already uncovered cell");
-            }
-
+            if (State == BoardCellState.Uncovered) return false;
             State = BoardCellState.Uncovered;
+            return true;
         }
 
         public void Flag()
@@ -53,8 +52,8 @@ namespace MinesweeperAPI.Model
 
     public enum BoardCellState
     {
-        Uncovered,
         Covered,
-        Flagged
+        Flagged,
+        Uncovered
     }
 }

@@ -1,17 +1,24 @@
 ﻿using System;
 
-namespace MinesweeperAPI.Model
+namespace MinesweeperAPI.Model.BoardBuilders
 {
     public class RandomBoardBuilder : IBoardBuilder
     {
-        public Board Build(int width, int height, int minesCount)
+        public RandomBoardBuilder(int minesCount)
         {
-            var board = new Board(width, height, minesCount);
+            MinesCount = minesCount;
+        }
+
+        public int MinesCount { get; set; }
+        
+        public Board Build(int width, int height)
+        {
+            var board = new Board(width, height);
             
             var random = new Random();
             var addedMines = 0;
 
-            while (addedMines < minesCount)
+            while (addedMines < MinesCount)
             {
                 var mineAdded = false;
                 var tries = 3;
@@ -25,7 +32,7 @@ namespace MinesweeperAPI.Model
                     x = random.Next(width);
                     y = random.Next(height);
 
-                    if (board.TrySetMineOnCell(x, y))
+                    if (board.TrySetMineOnCell(new BoardCellCoordinate(x, y)))
                     {
                         mineAdded = true;
                         addedMines++;
@@ -55,9 +62,9 @@ namespace MinesweeperAPI.Model
 
         private static bool TrySetMineOnAdjacentCell(int x, int y, Board board)
         {
-            foreach (var coordinate in board.GetAdjacentCellsCoordinates(x, y))
+            foreach (var coordinate in board.GetAdjacentCellsCoordinates(new BoardCellCoordinate(x, y)))
             {
-                if (board.TrySetMineOnCell(coordinate.X, coordinate.Y))
+                if (board.TrySetMineOnCell(coordinate))
                 {
                     return true;
                 }
@@ -72,7 +79,7 @@ namespace MinesweeperAPI.Model
             {
                 for (var j = 0; j < board.Height; j++)
                 {
-                    if (board.TrySetMineOnCell(i, j)) return;
+                    if (board.TrySetMineOnCell(new BoardCellCoordinate(i, j))) return;
                 }
             }
         }

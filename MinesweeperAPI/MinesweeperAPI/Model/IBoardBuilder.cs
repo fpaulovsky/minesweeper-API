@@ -2,6 +2,6 @@
 {
     public interface IBoardBuilder
     {
-        Board Build(int width, int height, int minesCount);
+        Board Build(int width, int height);
     }
 }
