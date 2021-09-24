@@ -21,7 +21,9 @@ At the moment the API has 2 controllers: Players and Games.
 * To play the game (route /Games):
   * POST to /Games to start a new game. The JSON body of this request must have width, height and minesCount properties. A JSON containing the game information will be returned in the response if the settings are valid. Only logged-in users can create new games.
   * GET to /Games/{id} to retrieve game with ID {id}. Only logged-in users can retrieve their games. Only games belonging to the logged-in user will be returned.
-  * PATCH to /Games/{id}/UncoverCell?X={x}&Y={u} to uncover a cell with coordinates x and y on a particular game with ID {id}.
-  * PATCH to /Games/{id}/FlagCell?X={x}&Y={u} to flag a cell with coordinates x and y on a particular game with ID {id}.
-  * PATCH to /Games/{id}/UnFlagCell?X={x}&Y={u} to unflag a cell with coordinates x and y on a particular game with ID {id}.
-  * GET to /Games to retrieve a list of the logged-in user games.
+  * PATCH to /Games/{id}/UncoverCell?x={x}&y={u} to uncover a cell with coordinates x and y on a particular game with ID {id}.
+  * PATCH to /Games/{id}/FlagCell?x={x}&y={u} to flag a cell with coordinates x and y on a particular game with ID {id}.
+  * PATCH to /Games/{id}/UnFlagCell?x={x}&y={u} to unflag a cell with coordinates x and y on a particular game with ID {id}.
+  * GET to /Games?pageSize={s}&pageNumber={n} to retrieve a list of the logged-in user games. The list is paginated. Set "s" to specify page size and set "n" to specify page number. First page is 1.
+
+All routes in the /Games endpoint require that the logged-in user sends a valid authentication token using the Bearer format in the "Authorization" header.
