@@ -8,10 +8,11 @@ namespace MinesweeperAPI.Model
     {
         public int Id { get; set; }
 
+        [Required]
         public Player Player { get; set; }
 
         [Required]
-        public GameStatus Status { get; set; }
+        public string State { get; set; }
 
         [Required]
         public DateTime StartDate { get; set; }
@@ -28,12 +29,12 @@ namespace MinesweeperAPI.Model
         {
             get
             {
-                if (Status == GameStatus.PlayerLost)
+                if (State == GameState.PlayerLost)
                 {
                     return $"Game lost on {EndDate.Value.ToShortDateString()} at {EndDate.Value.ToShortTimeString()}";
                 }
 
-                if (Status == GameStatus.PlayerWon)
+                if (State == GameState.PlayerWon)
                 {
                     return $"Game won on {EndDate.Value.ToShortDateString()} at {EndDate.Value.ToShortTimeString()}";
                 }
@@ -48,7 +49,7 @@ namespace MinesweeperAPI.Model
 
             if (Board.HasMineOnCell(coordinate))
             {
-                Status = GameStatus.PlayerLost;
+                State = GameState.PlayerLost;
                 EndDate = DateTime.UtcNow;
                 return;
             }
@@ -57,7 +58,7 @@ namespace MinesweeperAPI.Model
 
             if (!Board.HasCoveredCellsWithoutMines())
             {
-                Status = GameStatus.PlayerWon;
+                State = GameState.PlayerWon;
                 EndDate = DateTime.UtcNow;
             }
         }
@@ -78,17 +79,17 @@ namespace MinesweeperAPI.Model
 
         public void CheckGameStatus()
         {
-            if (Status != GameStatus.Started)
+            if (State != GameState.Started)
             {
                 throw new Exception("This game is currently over");
             }
         }
     }
 
-    public enum GameStatus
+    public class GameState
     {
-        Started,
-        PlayerWon,
-        PlayerLost
+        public const string Started = "started";
+        public const string PlayerWon = "player-won";
+        public const string PlayerLost = "player-lost";
     }
 }

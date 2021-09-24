@@ -7,8 +7,8 @@
 
         public BoardCellCoordinate(int x, int y)
         {
-            X = x < 0 ? 0 : x;
-            Y = y < 0 ? 0 : y;
+            X = x;
+            Y = y;
         }
     }
 }

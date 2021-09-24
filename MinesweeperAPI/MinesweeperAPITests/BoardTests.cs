@@ -2,6 +2,7 @@ using MinesweeperAPI.Model;
 using MinesweeperAPI.Model.BoardBuilders;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace MinesweeperAPITests
@@ -67,27 +68,19 @@ namespace MinesweeperAPITests
         }
 
         [Fact]
-        public void GetPlayerViewOfInitialBoardIsCoveredAndWithoutAdjancentMinesInfo()
+        public void GetFlaggedOrUncoveredCellsOfInitialBoardIsEmpty()
         {
             var board = new Board(3, 3);
             board.TrySetMineOnCell(new BoardCellCoordinate(0, 0));
             board.TrySetMineOnCell(new BoardCellCoordinate(1, 1));
             board.TrySetMineOnCell(new BoardCellCoordinate(2, 2));
 
-            var playerView = board.GetPlayerView();
-            for (var i = 0; i < playerView.GetLength(0); i++)
-            {
-                for (var j = 0; j < playerView.GetLength(1); j++)
-                {
-                    var cell = playerView[i, j];
-                    Assert.Equal(BoardCellState.Covered, cell.State);
-                    Assert.Null(cell.AdjacentMinesCount);
-                }
-            }
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
+            Assert.Empty(flaggedOrUncoveredCells);
         }
 
         [Fact]
-        public void GetPlayerViewRevealsAdjancentMines()
+        public void GetFlaggedOrUncoveredCellsRevealsAdjancentMines()
         {
             var board = new Board(3, 3);
             board.TrySetMineOnCell(new BoardCellCoordinate(0, 0));
@@ -95,66 +88,64 @@ namespace MinesweeperAPITests
 
             board.UncoverCell(new BoardCellCoordinate(0, 1));
 
-            var playerView = board.GetPlayerView();
-            
-            Assert.Equal(BoardCellState.Covered, playerView[0, 0].State);
-            Assert.Equal(BoardCellState.Uncovered, playerView[0, 1].State);
-            Assert.Equal(2, playerView[0, 1].AdjacentMinesCount);
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
+
+            Assert.Single(flaggedOrUncoveredCells);
+            Assert.Equal(BoardCellState.Uncovered, flaggedOrUncoveredCells[0].State);
+            Assert.Equal(2, flaggedOrUncoveredCells[0].AdjacentMinesCount);
         }
 
         [Fact]
-        public void GetPlayerViewWithNoMinesRevealsWholeBoard()
+        public void GetFlaggedOrUncoveredCellsWithNoMinesRevealsWholeBoard()
         {
             var board = new Board(3, 3);
             board.UncoverCell(new BoardCellCoordinate(0, 0));
 
-            var playerView = board.GetPlayerView();
-
-            for (var i = 0; i < playerView.GetLength(0); i++)
-            {
-                for (var j = 0; j < playerView.GetLength(1); j++)
-                {
-                    var cell = playerView[i, j];
-                    Assert.Equal(BoardCellState.Uncovered, cell.State);
-                }
-            }
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
+            Assert.Equal(9, flaggedOrUncoveredCells.Count);
         }
 
         [Fact]
-        public void GetPlayerViewWithSingleMineRevealsBoard()
+        public void GetFlaggedOrUncoveredCellsWithSingleMineRevealsBoard()
         {
             var board = new Board(3, 3);
             board.TrySetMineOnCell(new BoardCellCoordinate(2, 2));
 
             board.UncoverCell(new BoardCellCoordinate(0, 0));
 
-            var playerView = board.GetPlayerView();
-
-            Assert.Equal(BoardCellState.Uncovered, playerView[0, 0].State);
-            Assert.Equal(0, playerView[0, 0].AdjacentMinesCount);
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
             
-            Assert.Equal(BoardCellState.Uncovered, playerView[0, 1].State);
-            Assert.Equal(0, playerView[0, 1].AdjacentMinesCount);
-            
-            Assert.Equal(BoardCellState.Uncovered, playerView[0, 2].State);
-            Assert.Equal(0, playerView[0, 2].AdjacentMinesCount);
+            var cell00 = flaggedOrUncoveredCells.First(c => c.X == 0 && c.Y == 0);
+            Assert.Equal(BoardCellState.Uncovered, cell00.State);
+            Assert.Equal(0, cell00.AdjacentMinesCount);
 
-            Assert.Equal(BoardCellState.Uncovered, playerView[1, 0].State);
-            Assert.Equal(0, playerView[1, 0].AdjacentMinesCount);
+            var cell01 = flaggedOrUncoveredCells.First(c => c.X == 0 && c.Y == 1);
+            Assert.Equal(BoardCellState.Uncovered, cell01.State);
+            Assert.Equal(0, cell01.AdjacentMinesCount);
 
-            Assert.Equal(BoardCellState.Uncovered, playerView[2, 0].State);
-            Assert.Equal(0, playerView[2, 0].AdjacentMinesCount);
+            var cell02 = flaggedOrUncoveredCells.First(c => c.X == 0 && c.Y == 2);
+            Assert.Equal(BoardCellState.Uncovered, cell02.State);
+            Assert.Equal(0, cell02.AdjacentMinesCount);
 
-            Assert.Equal(BoardCellState.Uncovered, playerView[1, 1].State);
-            Assert.Equal(1, playerView[1, 1].AdjacentMinesCount);
-            
-            Assert.Equal(BoardCellState.Uncovered, playerView[1, 2].State);
-            Assert.Equal(1, playerView[1, 2].AdjacentMinesCount);
+            var cell10 = flaggedOrUncoveredCells.First(c => c.X == 1 && c.Y == 0);
+            Assert.Equal(BoardCellState.Uncovered, cell10.State);
+            Assert.Equal(0, cell10.AdjacentMinesCount);
 
-            Assert.Equal(BoardCellState.Uncovered, playerView[2, 1].State);
-            Assert.Equal(1, playerView[2, 1].AdjacentMinesCount);
+            var cell20 = flaggedOrUncoveredCells.First(c => c.X == 2 && c.Y == 0);
+            Assert.Equal(BoardCellState.Uncovered, cell20.State);
+            Assert.Equal(0, cell20.AdjacentMinesCount);
 
-            Assert.Equal(BoardCellState.Covered, playerView[2, 2].State);
+            var cell11 = flaggedOrUncoveredCells.First(c => c.X == 1 && c.Y == 1);
+            Assert.Equal(BoardCellState.Uncovered, cell11.State);
+            Assert.Equal(1, cell11.AdjacentMinesCount);
+
+            var cell12 = flaggedOrUncoveredCells.First(c => c.X == 1 && c.Y == 2);
+            Assert.Equal(BoardCellState.Uncovered, cell12.State);
+            Assert.Equal(1, cell12.AdjacentMinesCount);
+
+            var cell21 = flaggedOrUncoveredCells.First(c => c.X == 2 && c.Y == 1);
+            Assert.Equal(BoardCellState.Uncovered, cell21.State);
+            Assert.Equal(1, cell21.AdjacentMinesCount);
         }
 
         [Fact]
@@ -163,8 +154,9 @@ namespace MinesweeperAPITests
             var board = new Board(3, 3);
             board.FlagCell(new BoardCellCoordinate(0, 0));
             
-            var playerView = board.GetPlayerView();
-            Assert.Equal(BoardCellState.Flagged, playerView[0, 0].State);
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
+            var cell00 = flaggedOrUncoveredCells.First(c => c.X == 0 && c.Y == 0);
+            Assert.Equal(BoardCellState.Flagged, cell00.State);
         }
 
         [Fact]
@@ -174,8 +166,8 @@ namespace MinesweeperAPITests
             board.FlagCell(new BoardCellCoordinate(0, 0));
             board.UnFlagCell(new BoardCellCoordinate(0, 0));
 
-            var playerView = board.GetPlayerView();
-            Assert.Equal(BoardCellState.Covered, playerView[0, 0].State);
+            var flaggedOrUncoveredCells = board.GetFlaggedOrUncoveredCells();
+            Assert.Empty(flaggedOrUncoveredCells);
         }
 
         [Fact]

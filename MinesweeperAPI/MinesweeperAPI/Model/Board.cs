@@ -1,5 +1,7 @@
-﻿using System;
+﻿using MinesweeperAPI.Dtos;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MinesweeperAPI.Model
 {
@@ -12,17 +14,17 @@ namespace MinesweeperAPI.Model
             Height = height;
             MinesCount = 0;
 
-            _cells = new BoardCell[width, height];
+            Cells = new List<BoardCell>(width * height);
             for (var x = 0; x < width; x++)
             {
                 for (var y = 0; y < height; y++)
                 {
-                    _cells[x, y] = new BoardCell();
+                    Cells.Add(new BoardCell(x, y));
                 }
             }
         }
 
-        private BoardCell[,] _cells;
+        public List<BoardCell> Cells { get; private set; }
 
         public int Width { get; private set; }
 
@@ -30,7 +32,7 @@ namespace MinesweeperAPI.Model
         
         public int MinesCount { get; private set; }
 
-        private BoardCell GetCell(BoardCellCoordinate coordinate)
+        public BoardCell GetCell(BoardCellCoordinate coordinate)
         {
             return GetCell(coordinate.X, coordinate.Y);
         }
@@ -57,7 +59,7 @@ namespace MinesweeperAPI.Model
                 throw new Exception("Cell coordinate on axis Y cannot be greater than board height");
             }
 
-            return _cells[x, y];
+            return Cells.First(c => c.X == x && c.Y == y);
         }
 
         public bool HasMineOnCell(BoardCellCoordinate coordinate)
@@ -88,22 +90,6 @@ namespace MinesweeperAPI.Model
             return true;
         }
 
-        public List<BoardCellCoordinate> GetAdjacentCellsCoordinates(BoardCellCoordinate coordinate)
-        {
-            var coords = new List<BoardCellCoordinate>(8);
-            for (var i = coordinate.X - 1; i <= coordinate.X + 1; i++)
-            {
-                for (var j = coordinate.Y - 1; j <= coordinate.Y + 1; j++)
-                {
-                    if (0 <= i && i < Width && 0 <= j && j < Height && (i != coordinate.X || j != coordinate.Y))
-                    {
-                        coords.Add(new BoardCellCoordinate(i, j));
-                    }
-                }
-            }
-            return coords;
-        }
-
         public void UncoverCell(BoardCellCoordinate coordinate)
         {
             var cell = GetCell(coordinate);
@@ -128,31 +114,52 @@ namespace MinesweeperAPI.Model
             cell.UnFlag();
         }
 
-        public BoardCellPlayerView[,] GetPlayerView()
+        public List<BoardCellCoordinate> GetAdjacentCellsCoordinates(BoardCellCoordinate coordinate)
         {
-            var boardPlayerView = new BoardCellPlayerView[Width, Height];
-            for (var i = 0; i < Width; i++)
+            var coords = new List<BoardCellCoordinate>(8);
+            for (var x = coordinate.X - 1; x <= coordinate.X + 1; x++)
             {
-                for (var j = 0; j < Height; j++)
+                for (var y = coordinate.Y - 1; y <= coordinate.Y + 1; y++)
                 {
-                    var currentCell = GetCell(i, j);
-                    boardPlayerView[i, j] = new BoardCellPlayerView
+                    if (0 <= x && x < Width && 0 <= y && y < Height && (x != coordinate.X || y != coordinate.Y))
                     {
-                        State = currentCell.State,
-                        AdjacentMinesCount = currentCell.State == BoardCellState.Uncovered ? currentCell.AdjacentMinesCount : null
-                    };
+                        coords.Add(new BoardCellCoordinate(x, y));
+                    }
                 }
             }
-            return boardPlayerView;
+            return coords;
+        }
+
+        public List<BoardCellDto> GetFlaggedOrUncoveredCells()
+        {
+            var result = new List<BoardCellDto>();
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    var cell = GetCell(x, y);
+                    if (cell.State != BoardCellState.Covered)
+                    {
+                        result.Add(new BoardCellDto
+                        {
+                            X = x,
+                            Y = y,
+                            State = cell.State,
+                            AdjacentMinesCount = cell.AdjacentMinesCount
+                        });
+                    }
+                }
+            }
+            return result;
         }
 
         public bool HasCoveredCellsWithoutMines()
         {
-            for (var i = 0; i < Width; i++)
+            for (var x = 0; x < Width; x++)
             {
-                for (var j = 0; j < Height; j++)
+                for (var y = 0; y < Height; y++)
                 {
-                    var currentCell = GetCell(i, j);
+                    var currentCell = GetCell(x, y);
                     if (!currentCell.HasMine && currentCell.State == BoardCellState.Covered)
                     {
                         return true;
@@ -160,6 +167,31 @@ namespace MinesweeperAPI.Model
                 }
             }
             return false;
+        }
+
+        
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj)) return true;
+            return Equals(obj as Board);
+        }
+
+        public virtual bool Equals(Board other)
+        {
+            if (other == null) return false;
+
+            return other.Width.Equals(Width) &&
+                other.Height.Equals(Height) &&
+                other.MinesCount.Equals(MinesCount) &&
+                other.Cells.SequenceEqual(Cells);
+        }
+
+        public override int GetHashCode()
+        {
+            return Width.GetHashCode() * 17 +
+                Height.GetHashCode() +
+                MinesCount.GetHashCode() +
+                Cells.GetHashCode();
         }
     }
 }

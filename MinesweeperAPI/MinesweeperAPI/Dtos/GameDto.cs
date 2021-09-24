@@ -1,4 +1,5 @@
 ﻿using MinesweeperAPI.Model;
+using System;
 
 namespace MinesweeperAPI.Dtos
 {
@@ -8,8 +9,12 @@ namespace MinesweeperAPI.Dtos
 
         public string Name { get; set; }
 
-        public GameStatus Status { get; set; }
+        public GameState Status { get; set; }
 
-        public BoardCellPlayerView[,] Board { get; set; }
+        public DateTime StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        public BoardDto Board { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace MinesweeperAPI.Dtos
 {
-    public class GameSetupDto
+    public class NewGameDto
     {
         public int Width { get; set; }
 
