@@ -3,3 +3,5 @@ bin
 obj
 /MinesweeperAPI/.vs/MinesweeperAPI/v16/TestStore/0/003.testlog
 /MinesweeperAPI/.vs/MinesweeperAPI/v16/TestStore/0/testlog.manifest
+/MinesweeperAPI/.vs/MinesweeperAPI/config/applicationhost.config
+testlog
